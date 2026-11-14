@@ -20,6 +20,9 @@ heicSeq = 0
 heicPending = {}
 loadId = 0
 
+STORAGE_KEY = 'sfz.settings'
+saveTimer = null
+
 
 dataURItoBlob = (dataURI) ->
     binStr = atob (dataURI.split ',')[1]
@@ -46,6 +49,58 @@ setStatus = (text) ->
 isHeic = (f) ->
     return true if (f.type or '').toLowerCase() in heicTypes
     /\.(hei[cf]|hif)$/i.test f.name or ''
+
+
+# 只持久化水印样式参数，图片本身不进 localStorage
+readSettings = ->
+    try
+        raw = window.localStorage.getItem STORAGE_KEY
+        return null if not raw
+        JSON.parse raw
+    catch err
+        null
+
+
+applySettings = ->
+    saved = readSettings()
+    return if not saved?
+
+    if typeof saved.text is 'string'
+        input.text.value = saved.text.slice 0, 30
+
+    if typeof saved.color is 'string' and /^#[0-9a-f]{6}$/i.test saved.color
+        input.color.value = saved.color
+
+    for item in ['alpha', 'angle', 'space', 'size'] when saved[item]?
+        value = parseFloat saved[item]
+        continue if isNaN value
+
+        el = input[item]
+        value = Math.min (Math.max value, parseFloat el.min), parseFloat el.max
+        el.value = value
+
+    autoRefresh.checked = saved.autoRefresh if typeof saved.autoRefresh is 'boolean'
+
+
+saveSettings = ->
+    try
+        settings =
+            text: input.text.value
+            color: input.color.value
+            alpha: input.alpha.value
+            angle: input.angle.value
+            space: input.space.value
+            size: input.size.value
+            autoRefresh: autoRefresh.checked
+
+        window.localStorage.setItem STORAGE_KEY, JSON.stringify settings
+    catch err
+        null
+
+
+scheduleSave = ->
+    window.clearTimeout saveTimer if saveTimer?
+    saveTimer = window.setTimeout saveSettings, 300
 
 
 # HEIC 解码走 Worker，避免大图解码卡住主线程。
@@ -218,17 +273,28 @@ image.addEventListener 'change', ->
     readFile()
 
 
+syncRefresh = ->
+    if autoRefresh.checked
+        refresh.setAttribute 'disabled', 'disabled'
+    else
+        refresh.removeAttribute 'disabled'
+
+
 inputItems.forEach (item) ->
     el = $ '#' + item
     input[item] = el
 
-    autoRefresh.addEventListener 'change', ->
-        if @checked
-            refresh.setAttribute 'disabled', 'disabled'
-        else
-            refresh.removeAttribute 'disabled'
-
     el.addEventListener 'input', ->
         drawText() if autoRefresh.checked
+        scheduleSave()
 
-    refresh.addEventListener 'click', drawText
+
+refresh.addEventListener 'click', drawText
+
+autoRefresh.addEventListener 'change', ->
+    syncRefresh()
+    scheduleSave()
+
+
+applySettings()
+syncRefresh()
