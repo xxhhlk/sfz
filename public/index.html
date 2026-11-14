@@ -22,6 +22,7 @@
         input#text { width: 100%; box-sizing: border-box; font-size: 16px; margin-bottom: 10px }
         input[type=range] { width: 200px; height: 18px; }
 
+        #status { color: #777; font-size: 14px }
         canvas { box-sizing: border-box; width: 100%; border: 1px dashed #AAA; cursor: pointer }
     </style>
 </head>
@@ -58,6 +59,7 @@
             <input type="checkbox" id="auto-refresh" autocomplete="off" checked>
             <button id="refresh" disabled>刷新</button>
         </p>
+        <p id="status"></p>
         <p id="graph"></p>
     </div>
     <script src="./script.js"></script>

@@ -8,6 +8,9 @@ dependencies:
   coffeescript:
     specifier: ^2.7.0
     version: 2.7.0
+  libheif-js:
+    specifier: ^1.23.5
+    version: 1.23.5
 
 packages:
 
@@ -15,4 +18,9 @@ packages:
     resolution: {integrity: sha512-hzWp6TUE2d/jCcN67LrW1eh5b/rSDKQK6oD6VMLlggYVUUFexgTH9z3dNYihzX4RMhze5FTUsUmOXViJKFQR/A==}
     engines: {node: '>=6'}
     hasBin: true
+    dev: false
+
+  /libheif-js@1.23.5:
+    resolution: {integrity: sha512-umXZPthnWZtF3iG/5mQG+AZ2V6i0UeYpo3z2CkggTEgL8dKmIIwJT6TDuAMuabXa1yTW8uJ1ZAgR+CxNTklYYw==}
+    engines: {node: '>=8.0.0'}
     dev: false
